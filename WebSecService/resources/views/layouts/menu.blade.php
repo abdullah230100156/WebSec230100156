@@ -16,6 +16,11 @@
             <li class="nav-item">
                 <a class="nav-link" href="{{route('products_list')}}">Products</a>
             </li>
+            @auth
+            <li class="nav-item">
+                <a class="nav-link" href="{{ route('my.purchases') }}">My Purchases</a>
+            </li>
+            @endauth
             @can('show_users')
             <li class="nav-item">
                 <a class="nav-link" href="{{route('users')}}">Users</a>

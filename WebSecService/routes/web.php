@@ -3,6 +3,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use App\Http\Controllers\Web\ProductsController;
 use App\Http\Controllers\Web\UsersController;
+use App\Http\Controllers\Web\PurchaseController;
+
 
 Route::get('register', [UsersController::class, 'register'])->name('register');
 Route::post('register', [UsersController::class, 'doRegister'])->name('do_register');
@@ -45,3 +47,27 @@ Route::get('/prime', function () {
 Route::get('/test', function () {
     return view('test');
 });
+Route::post('/purchase/{id}', [ProductsController::class, 'purchase'])->name('product.purchase');
+Route::get('/my-purchases', [PurchaseController::class, 'myPurchases'])->name('my.purchases');
+
+
+Route::middleware(['auth'])->group(function () {
+    Route::get('/profile', [UsersController::class, 'profile'])->name('profile');
+});
+
+
+Route::middleware('auth')->group(function () {
+    Route::get('/purchases', [PurchaseController::class, 'myPurchases'])->name('my.purchases');
+    Route::post('/purchase/{productId}', [PurchaseController::class, 'purchaseProduct'])->name('purchase.product');
+});
+
+Route::post('/product/{id}/purchase', [PurchaseController::class, 'purchaseProduct'])->name('product.purchase');
+
+Route::get('/users/create', [UsersController::class, 'create'])->name('users_create');
+Route::post('/users/store', [UsersController::class, 'store'])->name('users_store');
+
+Route::get('/users/add-credit', [\App\Http\Controllers\Web\UsersController::class, 'addCreditForm'])->name('credit.form');
+Route::post('/users/add-credit', [\App\Http\Controllers\Web\UsersController::class, 'storeCredit'])->name('credit.store');
+
+
+Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users_delete');
