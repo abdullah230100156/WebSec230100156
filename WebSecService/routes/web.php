@@ -71,3 +71,5 @@ Route::post('/users/add-credit', [\App\Http\Controllers\Web\UsersController::cla
 
 
 Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users_delete');
+
+Route::get('/verify', [UsersController::class, 'verify'])->name('verify');
