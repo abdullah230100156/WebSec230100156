@@ -15,7 +15,9 @@ use App\Models\User;
 
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\Mail; 
+use Illuminate\Support\Facades\Mail;
+
+use App\Mail\VerificationEmail;
 
 
 class UsersController extends Controller
@@ -49,37 +51,34 @@ class UsersController extends Controller
     }
 
     public function doRegister(Request $request)
-{
-    try {
-        $this->validate($request, [
-            'name' => ['required', 'string', 'min:5'],
-            'email' => ['required', 'email', 'unique:users'],
-            'password' => ['required', 'confirmed', Password::min(8)->numbers()->letters()->mixedCase()->symbols()],
-        ]);
-    } catch (\Exception $e) {
-        return redirect()->back()->withInput($request->input())->withErrors('Invalid registration information.');
+    {
+        try {
+            $this->validate($request, [
+                'name' => ['required', 'string', 'min:5'],
+                'email' => ['required', 'email', 'unique:users'],
+                'password' => ['required', 'confirmed', Password::min(8)->numbers()->letters()->mixedCase()->symbols()],
+            ]);
+        } catch (\Exception $e) {
+            return redirect()->back()->withInput($request->input())->withErrors('Invalid registration information.');
+        }
+
+        $user = new User();
+        $user->name = $request->name;
+        $user->email = $request->email;
+        $user->password = bcrypt($request->password);
+        $user->credit = 0;
+        $user->save();
+
+        $user->assignRole('Customer');
+
+        // ✅ THIS PART sends the verification email
+        $title = "Verification Link";
+        $token = Crypt::encryptString(json_encode(['id' => $user->id, 'email' => $user->email]));
+        $link = route("verify", ['token' => $token]);
+        Mail::to($user->email)->send(new VerificationEmail($link, $user->name));
+
+        return redirect('/')->with('success', 'Account created! Please check your email to verify.');
     }
-
-    $user = new User();
-    $user->name = $request->name;
-    $user->email = $request->email;
-    $user->password = bcrypt($request->password);
-    $user->credit = 0;
-    $user->save();
-
-    $user->assignRole('Customer');
-
-    // ✅ THIS PART sends the verification email
-    $token = Crypt::encryptString(json_encode([
-        'id' => $user->id,
-        'email' => $user->email
-    ]));
-
-    $link = route('verify', ['token' => $token]);
-    Mail::to($user->email)->send(new \App\Mail\VerificationEmail($link, $user->name));
-
-    return redirect('/')->with('success', 'Account created! Please check your email to verify.');
-}
 
 
     public function login(Request $request)
@@ -92,8 +91,10 @@ class UsersController extends Controller
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password]))
             return redirect()->back()->withInput($request->input())->withErrors('Invalid login information.');
 
-        $user = User::where('email', $request->email)->first();
-        Auth::setUser($user);
+            $user = User::where('email', $request->email)->first();
+            if(!$user->email_verified_at)
+            return redirect()->back()->withInput($request->input())
+            ->withErrors('Your email is not verified.');
 
         return redirect('/');
     }
@@ -275,36 +276,33 @@ class UsersController extends Controller
         return redirect()->route('users')->with('success', 'Credit added successfully.');
     }
     public function destroy($id)
-{
-    $user = User::findOrFail($id);
+    {
+        $user = User::findOrFail($id);
 
-    // Optionally, add any checks (e.g., if the user is not admin, etc.)
+        // Optionally, add any checks (e.g., if the user is not admin, etc.)
 
-    $user->delete();
+        $user->delete();
 
-    return redirect()->route('users')->with('success', 'User deleted successfully!');
-}
-
-
-public function verify(Request $request)
-{
-    // Decrypt the token and get user info
-    $decryptedData = json_decode(Crypt::decryptString($request->token), true);
-
-    // Find the user by ID
-    $user = User::find($decryptedData['id']);
-    if (!$user) {
-        abort(401); // Unauthorized
+        return redirect()->route('users')->with('success', 'User deleted successfully!');
     }
 
-    // Mark email as verified
-    $user->email_verified_at = Carbon::now();
-    $user->save();
 
-    // Show the verified page
-    return view('users.verified', compact('user'));
+    public function verify(Request $request)
+    {
+        // Decrypt the token and get user info
+        $decryptedData = json_decode(Crypt::decryptString($request->token), true);
+
+        // Find the user by ID
+        $user = User::find($decryptedData['id']);
+        if (!$user) {
+            abort(401); // Unauthorized
+        }
+
+        // Mark email as verified
+        $user->email_verified_at = Carbon::now();
+        $user->save();
+
+        // Show the verified page
+        return view('users.verified', compact('user'));
+    }
 }
-
-    
-}
-
