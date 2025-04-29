@@ -1,3 +1,4 @@
+
 @extends('layouts.master')
 @section('title', 'My Purchases')
 
@@ -18,3 +19,5 @@
         @endforeach
     @endif
 @endsection
+
+

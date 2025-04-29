@@ -1,6 +1,7 @@
 <?php
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Web\ProductsController;
 use App\Http\Controllers\Web\UsersController;
 use App\Http\Controllers\Web\PurchaseController;
@@ -71,6 +72,17 @@ Route::post('/users/add-credit', [\App\Http\Controllers\Web\UsersController::cla
 
 
 Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users_delete');
+
+Route::post('/reset-credit', [UsersController::class, 'resetCredit'])->name('reset.credit');
+
+Route::get('/purchases', [PurchaseController::class, 'myPurchases'])->name('purchases.index');
+
+Route::post('/return/{id}', [\App\Http\Controllers\Web\PurchaseController::class, 'returnProduct'])->name('product.return');
+Route::delete('/purchase/{id}', [PurchaseController::class, 'destroy'])->name('purchase.destroy');
+
+
+
+
 
 Route::get('/verify', [UsersController::class, 'verify'])->name('verify');
 
