@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
 
-use App\Mail\VerificationEmail;
+use App\Mail\VerificationEmail; 
 
 
 class UsersController extends Controller
