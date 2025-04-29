@@ -101,7 +101,9 @@ Route::get('/purchases', [PurchaseController::class, 'myPurchases'])->name('purc
 
 
 Route::get('/verify', [UsersController::class, 'verify'])->name('verify');
-
+// ############################
+Route::get('verify', [UsersController::class, 'verify'])->name('verify');
+// ############################ 
 
 // xss injection
 Route::get('sqli', function (Request $request) {
