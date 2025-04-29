@@ -47,16 +47,16 @@
     </div>
 </form>
 
-{{-- ######################################################## --}}
+{{-- Display Search Results --}}
 @if(!empty(request()->keywords))
     <div class="card mt-2">
         <div class="card-body">
-            view search results: <span>{{!!request()->keywords!!}}</span>
+            View search results: <span>{{ request()->keywords }}</span>
         </div>
     </div>
 @endif
-{{-- ######################################################## --}}
 
+{{-- Product Listings --}}
 @foreach($products as $product)
     <div class="card mt-2">
         <div class="card-body">
@@ -90,21 +90,23 @@
                         <tr><th>Stock</th><td>{{ $product->in_stock }} available</td></tr>
                     </table>
 
-                    @if($product->in_stock > 0)
-                        <form action="{{ route('product.purchase', $product->id) }}" method="POST">
-                            @csrf
-                            <button type="submit" class="btn btn-success btn-lg mt-3">
-                                <i class="bi bi-cart-plus"></i> Buy Now
-                            </button>
-                        </form>
-                    @else
-                        <div class="alert alert-danger mt-3">
-                            Out of stock
+                    {{-- Purchase Options --}}
+                    <div class="card mt-2">
+                        <div class="card-body">
+                            @if($product->in_stock > 0)
+                                @auth
+                                    <form action="{{ route('product.purchase', $product->id) }}" method="POST">
+                                        @csrf
+                                        <button type="submit" class="btn btn-success">Buy Now</button>
+                                    </form>
+                                @else
+                                    <a href="{{ route('register') }}" class="btn btn-warning">Register to Buy</a>
+                                @endauth
+                            @else
+                                <span class="badge bg-danger">Out of stock</span>
+                            @endif
                         </div>
-                        <button class="btn btn-secondary btn-lg mt-1" disabled>
-                            <i class="bi bi-cart-x"></i> Not Available
-                        </button>
-                    @endif
+                    </div>
 
                 </div>
             </div>

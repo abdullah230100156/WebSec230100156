@@ -5,6 +5,7 @@ use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\Web\ProductsController;
 use App\Http\Controllers\Web\UsersController;
 use App\Http\Controllers\Web\PurchaseController;
+use Illuminate\Foundation\Auth\EmailVerificationRequest;
 
 
 Route::get('register', [UsersController::class, 'register'])->name('register');
@@ -60,7 +61,25 @@ Route::middleware(['auth'])->group(function () {
 Route::middleware('auth')->group(function () {
     Route::get('/purchases', [PurchaseController::class, 'myPurchases'])->name('my.purchases');
     Route::post('/purchase/{productId}', [PurchaseController::class, 'purchaseProduct'])->name('purchase.product');
+    Route::post('/return/{id}', [\App\Http\Controllers\Web\PurchaseController::class, 'returnProduct'])->name('product.return');
+    Route::delete('/purchase/{id}', [PurchaseController::class, 'destroy'])->name('purchase.destroy');
 });
+
+
+Route::get('/email/verify', function () {
+    return view('auth.verify-email');
+})->middleware('auth')->name('verification.notice');
+
+Route::get('/email/verify/{id}/{hash}', function (EmailVerificationRequest $request) {
+    $request->fulfill();
+    return redirect('/'); // أو أي صفحة بعد التفعيل
+})->middleware(['auth', 'signed'])->name('verification.verify');
+
+Route::post('/email/verification-notification', function (Request $request) {
+    $request->user()->sendEmailVerificationNotification();
+    return back()->with('message', 'Verification link sent!');
+})->middleware(['auth', 'throttle:6,1'])->name('verification.send');
+
 
 Route::post('/product/{id}/purchase', [PurchaseController::class, 'purchaseProduct'])->name('product.purchase');
 
@@ -76,9 +95,6 @@ Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users_d
 Route::post('/reset-credit', [UsersController::class, 'resetCredit'])->name('reset.credit');
 
 Route::get('/purchases', [PurchaseController::class, 'myPurchases'])->name('purchases.index');
-
-Route::post('/return/{id}', [\App\Http\Controllers\Web\PurchaseController::class, 'returnProduct'])->name('product.return');
-Route::delete('/purchase/{id}', [PurchaseController::class, 'destroy'])->name('purchase.destroy');
 
 
 
