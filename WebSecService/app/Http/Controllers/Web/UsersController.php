@@ -1,7 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Web;
-
+use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Validation\Rules\Password;
 use Illuminate\Http\Request;
@@ -12,11 +12,9 @@ use DB;
 use Artisan;
 use App\Http\Controllers\Controller;
 use App\Models\User;
-
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
-
 use App\Mail\VerificationEmail; 
 
 
@@ -304,21 +302,21 @@ class UsersController extends Controller
     }
 
 
+    public function handleFacebookCallback(Request $request)
+    {
+        $userfacebook = Socialite::driver('facebook')->stateless()->user();
+        $user = User::updateOrCreate(
+            ['facebook_id' => $userfacebook->getId()],
+            [
+                'name' => $userfacebook->getName(),
+                'email' => $userfacebook->getEmail(),
+                'facebook_email' => $userfacebook->getEmail(),
+            ]
+        );
+        
+        Auth::login($user);
+        
+    
 
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
+}
 }

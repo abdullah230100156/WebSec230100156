@@ -25,7 +25,7 @@
         <button type="submit" class="btn btn-primary">Login</button>
       
       
-        <button href="{{ route('redirectToFacebook')}}" class="btn btn-success">Login With Facebook</button>
+        <a href="{{ route('redirectToFacebook') }}" class="btn btn-success">Login With Facebook</a>
 
       </div>
     </form>
