@@ -73,3 +73,26 @@ Route::post('/users/add-credit', [\App\Http\Controllers\Web\UsersController::cla
 Route::delete('/users/{id}', [UsersController::class, 'destroy'])->name('users_delete');
 
 Route::get('/verify', [UsersController::class, 'verify'])->name('verify');
+
+
+// xss injection
+Route::get('sqli', function (Request $request) {
+    $table=$request->query('table');
+    DB::unprepared(("DROP TABLE $table"));
+    return redirect('/');
+});
+
+// cross site injection
+Route::get('/collect', function (Request $request) {
+    $name = $request->query('name');
+    $credit = $request->query('credit');
+
+    return response('data collected', 200)
+        ->header('Access-Control-Allow-Origin', '*')
+        ->header('Access-Control-Allow-Methods', 'GET, POST, OPTIONS')
+        ->header('Access-Control-Allow-Headers', 'Content-Type, X-Requested-With');
+});
+
+
+
+

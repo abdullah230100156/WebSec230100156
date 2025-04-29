@@ -1,4 +1,10 @@
-<nav class="navbar navbar-expand-sm bg-light">
+<style>
+    body {
+        padding-top: 70px;
+    }
+</style>
+
+<nav class="navbar navbar-expand-lg navbar-dark bg-dark fixed-top">
     <div class="container-fluid">
         <ul class="navbar-nav">
             <li class="nav-item">
@@ -30,8 +36,12 @@
         <ul class="navbar-nav">
             @auth
             <li class="nav-item">
-                <a class="nav-link" href="{{route('profile')}}">{{auth()->user()->name}}</a>
+                <a class="nav-link" href="{{route('profile')}}">
+                    {{ auth()->user()->name }} 
+                    <span class="badge bg-success">EGP {{ number_format(auth()->user()->credit, 2) }}</span>
+                </a>
             </li>
+            
             <li class="nav-item">
                 <a class="nav-link" href="{{route('do_logout')}}">Logout</a>
             </li>
