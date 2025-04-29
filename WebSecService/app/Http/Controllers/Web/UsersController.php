@@ -91,10 +91,10 @@ class UsersController extends Controller
         if (!Auth::attempt(['email' => $request->email, 'password' => $request->password]))
             return redirect()->back()->withInput($request->input())->withErrors('Invalid login information.');
 
-            $user = User::where('email', $request->email)->first();
-            if(!$user->email_verified_at)
+        $user = User::where('email', $request->email)->first();
+        if (!$user->email_verified_at)
             return redirect()->back()->withInput($request->input())
-            ->withErrors('Your email is not verified.');
+                ->withErrors('Your email is not verified.');
 
         return redirect('/');
     }
@@ -289,20 +289,11 @@ class UsersController extends Controller
 
     public function verify(Request $request)
     {
-        // Decrypt the token and get user info
         $decryptedData = json_decode(Crypt::decryptString($request->token), true);
-
-        // Find the user by ID
         $user = User::find($decryptedData['id']);
-        if (!$user) {
-            abort(401); // Unauthorized
-        }
-
-        // Mark email as verified
+        if (!$user) abort(401);
         $user->email_verified_at = Carbon::now();
         $user->save();
-
-        // Show the verified page
         return view('users.verified', compact('user'));
     }
 }
