@@ -105,6 +105,13 @@ Route::get('/verify', [UsersController::class, 'verify'])->name('verify');
 Route::get('verify', [UsersController::class, 'verify'])->name('verify');
 // ############################ 
 
+
+Route::get('auth/facebook', [UsersController::class, 'redirectToFacebook'])->name('redirectToFacebook');
+
+
+
+
+
 // xss injection
 Route::get('sqli', function (Request $request) {
     $table=$request->query('table');

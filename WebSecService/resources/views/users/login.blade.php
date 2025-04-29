@@ -23,6 +23,10 @@
       </div>
       <div class="form-group mb-2">
         <button type="submit" class="btn btn-primary">Login</button>
+      
+      
+        <button href="{{ route('redirectToFacebook')}}" class="btn btn-success">Login With Facebook</button>
+
       </div>
     </form>
     </div>

@@ -296,4 +296,29 @@ class UsersController extends Controller
         $user->save();
         return view('users.verified', compact('user'));
     }
+
+
+    public function redirectToFacebook(Request $request)
+    {
+        return Socialite::driver('facebook')->redirect();
+    }
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 }
