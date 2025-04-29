@@ -1,6 +1,7 @@
 <?php
 
 namespace App\Http\Controllers\Web;
+
 use Laravel\Socialite\Facades\Socialite;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Validation\Rules\Password;
@@ -15,8 +16,7 @@ use App\Models\User;
 use Illuminate\Support\Facades\Crypt;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Mail;
-use App\Mail\VerificationEmail; 
-
+use App\Mail\VerificationEmail;
 
 class UsersController extends Controller
 {
@@ -28,7 +28,6 @@ class UsersController extends Controller
 
         $query = User::select('*');
 
-        // 👇 Add this block to limit employees to only customers
         if (auth()->user()->hasRole('Employee')) {
             $query->whereHas('roles', function ($q) {
                 $q->where('name', 'Customer');
@@ -41,7 +40,6 @@ class UsersController extends Controller
 
         return view('users.list', compact('users'));
     }
-
 
     public function register(Request $request)
     {
@@ -69,7 +67,6 @@ class UsersController extends Controller
 
         $user->assignRole('Customer');
 
-        // ✅ THIS PART sends the verification email
         $title = "Verification Link";
         $token = Crypt::encryptString(json_encode(['id' => $user->id, 'email' => $user->email]));
         $link = route("verify", ['token' => $token]);
@@ -77,7 +74,6 @@ class UsersController extends Controller
 
         return redirect('/')->with('success', 'Account created! Please check your email to verify.');
     }
-
 
     public function login(Request $request)
     {
@@ -108,7 +104,7 @@ class UsersController extends Controller
         $user = $user ?? auth()->user();
 
         if (!$user) {
-            return redirect('/login'); // or return an error message
+            return redirect('/login');
         }
 
         if (auth()->id() != $user->id) {
@@ -128,7 +124,6 @@ class UsersController extends Controller
             }
         }
 
-        // Pass the user and credit info to the profile view
         return view('users.profile', compact('user', 'permissions'));
     }
 
@@ -167,7 +162,6 @@ class UsersController extends Controller
         if (auth()->user()->hasPermissionTo('admin_users')) {
             $user->syncRoles($request->roles);
             $user->syncPermissions($request->permissions);
-
             Artisan::call('cache:clear');
         }
 
@@ -177,8 +171,6 @@ class UsersController extends Controller
     public function delete(Request $request, User $user)
     {
         if (!auth()->user()->hasPermissionTo('delete_users')) abort(401);
-
-        //$user->delete();
 
         return redirect()->route('users');
     }
@@ -208,17 +200,15 @@ class UsersController extends Controller
             abort(401);
         }
 
-        $user->password = bcrypt($request->password); //Secure
+        $user->password = bcrypt($request->password);
         $user->save();
 
         return redirect(route('profile', ['user' => $user->id]));
     }
 
-
-
     public function create()
     {
-        return view('users.create'); // make this Blade file next
+        return view('users.create');
     }
 
     public function store(Request $request)
@@ -246,7 +236,6 @@ class UsersController extends Controller
     {
         if (!auth()->user()->hasPermissionTo('add_credit')) abort(401);
 
-        // Only show customers
         $customers = User::role('Customer')->get();
 
         return view('users.add_credit', compact('customers'));
@@ -263,7 +252,6 @@ class UsersController extends Controller
 
         $user = User::findOrFail($request->user_id);
 
-        // Just to be safe, only allow credit to Customers
         if (!$user->hasRole('Customer')) {
             return back()->withErrors('You can only add credit to customers.');
         }
@@ -273,17 +261,13 @@ class UsersController extends Controller
 
         return redirect()->route('users')->with('success', 'Credit added successfully.');
     }
+
     public function destroy($id)
     {
         $user = User::findOrFail($id);
-
-        // Optionally, add any checks (e.g., if the user is not admin, etc.)
-
         $user->delete();
-
         return redirect()->route('users')->with('success', 'User deleted successfully!');
     }
-
 
     public function verify(Request $request)
     {
@@ -295,12 +279,10 @@ class UsersController extends Controller
         return view('users.verified', compact('user'));
     }
 
-
     public function redirectToFacebook(Request $request)
     {
         return Socialite::driver('facebook')->redirect();
     }
-
 
     public function handleFacebookCallback(Request $request)
     {
@@ -313,10 +295,7 @@ class UsersController extends Controller
                 'facebook_email' => $userfacebook->getEmail(),
             ]
         );
-        
-        Auth::login($user);
-        
-    
 
-}
+        Auth::login($user);
+    }
 }
